@@ -1,4 +1,4 @@
 # hello-world
 new repository
 Whats up
-Just trying to lean something about git
+Just trying to lean something more about git
