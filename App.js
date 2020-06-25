@@ -2,15 +2,16 @@ import React from 'react';
 import { AppRegistry, Alert, TouchableOpacity, Image, StyleSheet, Text, View } from 'react-native';
 import logo from './assets/logo.png'; 
 import * as ImagePicker from 'expo-image-picker';
+import * as Sharing from 'expo-sharing'; 
 
 export default function App() {
-  const [selectedImage, setSelectedImage] = React.useState(null);
+  let [selectedImage, setSelectedImage] = React.useState(null);
 
-   let openImagePickerAsync = async () => {
+  let openImagePickerAsync = async () => {
     let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
 
     if (permissionResult.granted === false) {
-      alert("Permission to access camera roll is required!");
+      alert('Permission to access camera roll is required!');
       return;
     }
 
@@ -22,22 +23,34 @@ export default function App() {
     setSelectedImage({ localUri: pickerResult.uri });
   };
 
+  let openShareDialogAsync = async () => {
+    if (!(await Sharing.isAvailableAsync())) {
+      alert(`Uh oh, sharing isn't available on your platform`);
+      return;
+    }
+
+    await Sharing.shareAsync(selectedImage.localUri);
+  };
+
   if (selectedImage !== null) {
     return (
       <View style={styles.container}>
-        <Image
-          source={{ uri: selectedImage.localUri }}
-          style={styles.thumbnail}
-        />
+        <Image source={{ uri: selectedImage.localUri }} style={styles.thumbnail} />
+        <TouchableOpacity onPress={openShareDialogAsync} style={styles.button}>
+          <Text style={styles.buttonText}>Share this photo</Text>
+        </TouchableOpacity>
       </View>
     );
   }
+
   return (
     <View style={styles.container}>
-    <Image source={logo} style={styles.logo} /> 
-    <Text  style={styles.instructions}> To start sharing photos, tap the button below.</Text>
+      <Image source={logo} style={styles.logo} />
+      <Text style={styles.instructions}>
+        To share a photo from your phone with a friend, just press the button below!
+      </Text>
 
-     <TouchableOpacity onPress={openImagePickerAsync} style={styles.button}>
+      <TouchableOpacity onPress={openImagePickerAsync} style={styles.button}>
         <Text style={styles.buttonText}>Pick a photo</Text>
       </TouchableOpacity>
     </View>
@@ -51,32 +64,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-   logo: {
-    width: 400,
-    height: 400,
-    marginBottom: -80,
-    marginHorizontal: 20,
-    margin: -90,
-    borderRadius: 30,
+  logo: {
+    width: 405,
+    height: 259,
+    marginBottom: 0,
   },
   instructions: {
     color: '#888',
     fontSize: 18,
-    marginHorizontal: 20,
-    marginBottom: 15,
-  }, 
+    marginHorizontal: 15,
+    marginBottom: 10,
+  },
   button: {
-    backgroundColor: "#100",
-    padding: 12,
-    borderRadius: 240,
+    backgroundColor: '#100',
+    padding: 20,
+    borderRadius: 20,
   },
   buttonText: {
-    fontSize: 15,
+    fontSize: 20,
     color: '#fff',
-  }, 
-    thumbnail: {
+  },
+  thumbnail: {
     width: 300,
     height: 300,
-    resizeMode: "contain"
-  }
+    resizeMode: 'contain',
+  },
 });
